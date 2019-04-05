@@ -23,7 +23,7 @@ spec:
           value: https://auth:8482/auth-service
         - name: frontend_url
           value: http://frontend:12000/login
-        image: libertybikes-auth
+        image: de.icr.io/edward_ciggaar/libertybikes-auth:8
         name: auth
         ports:
         - containerPort: 8082
@@ -71,7 +71,7 @@ spec:
         io.kompose.service: frontend
     spec:
       containers:
-      - image: libertybikes-frontend
+      - image: de.icr.io/edward_ciggaar/libertybikes-frontend:8
         name: frontend
         ports:
         - containerPort: 12000
@@ -123,7 +123,7 @@ spec:
         - name: org_libertybikes_restclient_PlayerService_mp_rest_url
           value: http://player:8081
         - name: singleParty
-        image: libertybikes-game
+        image: de.icr.io/edward_ciggaar/libertybikes-game:8
         name: game
         ports:
         - containerPort: 8080
@@ -171,7 +171,7 @@ spec:
         io.kompose.service: player
     spec:
       containers:
-      - image: libertybikes-player
+      - image: de.icr.io/edward_ciggaar/libertybikes-player:8
         name: player
         ports:
         - containerPort: 8081
