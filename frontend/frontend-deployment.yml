@@ -42,7 +42,4 @@ spec:
     port: 12000
     targetPort: 12000
   selector:
-    io.kompose.service: frontend
-status:
-  loadBalancer: {}
-  
+    io.kompose.service: frontend  

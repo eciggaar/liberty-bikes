@@ -46,11 +46,9 @@ spec:
   ports:
   - name: "8082"
     port: 8082
-    targetPort: 8082
+    nodePort: 308082
   - name: "8482"
     port: 8482
-    targetPort: 8482    
+    nodePort: 308482    
   selector:
     io.kompose.service: auth
-status:
-  loadBalancer: {}
