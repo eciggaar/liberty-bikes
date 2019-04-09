@@ -46,10 +46,10 @@ spec:
   ports:
   - name: "8082"
     port: 8082
-    nodePort: 308082
+    nodePort: 30082
   - name: "8482"
     port: 8482
-    nodePort: 308482
+    nodePort: 30482
   type: NodePort
   selector:
     io.kompose.service: auth

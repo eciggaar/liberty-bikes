@@ -43,6 +43,7 @@ spec:
   ports:
   - name: "8080"
     port: 8080
-    nodePort: 308080
+    nodePort: 30080
+  type: NodePort
   selector:
     io.kompose.service: game
