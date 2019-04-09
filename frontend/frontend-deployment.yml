@@ -40,6 +40,6 @@ spec:
   ports:
   - name: "12000"
     port: 12000
-    targetPort: 12000
+  type: NodePort
   selector:
     io.kompose.service: frontend  
