@@ -80,4 +80,10 @@ public class PlayerService {
         map.put("id", id);
         return map;
     }
+    
+    @GET
+    @Path("/getTestString")
+    public String getTestString() {
+        return "test string";
+    }
 }
