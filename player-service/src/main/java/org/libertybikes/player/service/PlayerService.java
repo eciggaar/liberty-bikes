@@ -83,7 +83,9 @@ public class PlayerService {
     
     @GET
     @Path("/getTestString")
-    public String getTestString() {
-        return "test string";
+    public HashMap<String, String> getTestString() {
+    	
+    	HashMap<String, String> map = new HashMap<String, String>();
+    	map.put("result","test string");
     }
 }
