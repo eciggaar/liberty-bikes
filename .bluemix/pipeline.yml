@@ -10,13 +10,11 @@ stages:
   jobs:
   - name: Build 
     type: builder
-    version: latest
     artifact_dir: ''
     build_type: shell
     script: |-
       #!/bin/bash
       ./gradlew clean build libertyPackage
-
 - name: Prepping Containers
   inputs:
   - type: job
@@ -196,7 +194,6 @@ stages:
       echo "GIT_BRANCH=${GIT_BRANCH}" >> $ARCHIVE_DIR/build.properties
       echo "File 'build.properties' created for passing env variables to subsequent pipeline jobs:"
       cat $ARCHIVE_DIR/build.properties
-      
 - name: Deploy to IBM Cloud
   inputs:
   - type: job
