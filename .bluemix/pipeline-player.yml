@@ -13,7 +13,7 @@ stages:
     type: builder
     artifact_dir: ''
     build_type: shell
-    script: |-
+    script: |
       #!/bin/bash
       ./gradlew clean build libertyPackage
 - name: Prepping Containers
@@ -138,7 +138,6 @@ stages:
         cat build.properties
       else 
         echo "build.properties : not found."
-        touch build.properties
       fi 
 
       # also run 'env' command to find all available env variables
@@ -199,7 +198,7 @@ stages:
   inputs:
   - type: job
     stage: Prepping Containers
-    job: libertybikes-player 
+    job: Build libertybikes-player
   triggers:
   - type: stage
   properties:
@@ -210,7 +209,7 @@ stages:
     value: ${PROD_CLUSTER_NAMESPACE}
     type: text
   - name: DEPLOYMENT_FILE
-    value: deployment.yml
+    value: ./player-service/player-deployment.yml
     type: text      
   jobs:
   - name: Pre-deploy check
