@@ -1,0 +1,18 @@
+---
+defaultBaseImageVersion: 'latest'
+stages:
+- name: Build
+  inputs:
+  - type: git
+    branch: player
+    service: ${GIT_REPO}    
+  triggers:
+  - type: commit
+  jobs:
+  - name: Build 
+    type: builder
+    artifact_dir: ''
+    build_type: shell
+    script: |-
+      #!/bin/bash
+      ./gradlew clean build libertyPackage
