@@ -88,5 +88,5 @@ public class PlayerService {
     	HashMap<String, String> map = new HashMap<String, String>();
     	map.put("result","test string");
     	return map;
-    } */   
+    }*/
 }
