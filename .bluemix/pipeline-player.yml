@@ -138,6 +138,7 @@ stages:
         cat build.properties
       else 
         echo "build.properties : not found."
+        touch build.properties
       fi 
 
       # also run 'env' command to find all available env variables
