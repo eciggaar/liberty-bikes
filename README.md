@@ -6,6 +6,8 @@ Publicly hosted on IBM Cloud here: [http://libertybikes.mybluemix.net/](http://l
 
 Bluemix toolchain automatically deploys the current `liberty-bikes/liberty-bikes:master` branch
 
+[![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy?repository=https://github.com/eciggaar/liberty-bikes&env_id=ibm:yp:eu-de)
+
 ## Run it locally
 
 Builds all microservice applications and deploys them to locally running liberty servers, then opens the UI.
