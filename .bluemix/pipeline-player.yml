@@ -10,6 +10,7 @@ stages:
   jobs:
   - name: Build 
     type: builder
+    version: latest
     artifact_dir: ''
     build_type: shell
     script: |-
