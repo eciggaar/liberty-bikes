@@ -6,7 +6,7 @@ Publicly hosted on IBM Cloud here: [http://libertybikes.mybluemix.net/](http://l
 
 ## Run it on IBM Cloud
 
-Please note that you'll need an IBM Cloud account for this. If you don't have one, you can sign up for free at ![https://cloud.ibm.com/registration](https://cloud.ibm.com/registration).
+Please note that you'll need an IBM Cloud account for this. If you don't have one, you can sign up for free at [https://cloud.ibm.com/registration](https://cloud.ibm.com/registration).
 
 Clicking the button below automatically deploys the current `liberty-bikes/liberty-bikes` branches `auth`, `player`, `frontend` and `game`.
 
