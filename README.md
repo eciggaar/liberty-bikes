@@ -4,7 +4,7 @@
 
 Publicly hosted on IBM Cloud here: [http://libertybikes.mybluemix.net/](http://libertybikes.mybluemix.net/)
 
-Bluemix toolchain automatically deploys the current `liberty-bikes/liberty-bikes:master` branch
+Clicking the button below automatically deploys the current `liberty-bikes/liberty-bikes` branches `auth`, `player`, `frontend` and `game`.
 
 [![Create toolchain](https://cloud.ibm.com/devops/graphics/create_toolchain_button.png)](https://cloud.ibm.com/devops/setup/deploy?repository=https://github.com/eciggaar/liberty-bikes&env_id=ibm:yp:eu-de)
 
