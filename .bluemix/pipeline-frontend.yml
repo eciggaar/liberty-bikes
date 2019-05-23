@@ -15,7 +15,7 @@ stages:
     build_type: shell
     script: |
       #!/bin/bash
-      ./gradlew clean build libertyPackage
+      ./gradlew clean build libertyPackage -c frontend-settings.gradle
 - name: Prepping Containers
   inputs:
   - type: job
