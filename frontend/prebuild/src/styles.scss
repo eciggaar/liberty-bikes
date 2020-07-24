@@ -7,7 +7,7 @@ h1 {
   font-size: 250%;
 }
 h2, h3 {
-  color: #444;
+  color: rgb(255, 255, 255);
   font-family: $default-font;
   font-weight: lighter;
 }
@@ -15,7 +15,7 @@ html {
   min-height: 100%;
 }
 body {
-  background: linear-gradient(#01001d, #03004e, #700067) fixed;
+  background: linear-gradient(to bottom, #131427, #2c2d4f) fixed;
   min-height: 100%;
   margin: 0;
   padding: 0;
@@ -26,21 +26,24 @@ body {
 a {
   cursor: pointer;
   cursor: hand;
+  text-decoration: none;
 }
 
 button {
   background-color: rgba(0, 0, 0, 0.2);
   border: 1px solid #ccc;
   color: #fff;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 button:disabled {
   opacity: 0.5;
 }
 
-button:hover:enabled {
+button:hover:enabled, button:focus:enabled {
   text-shadow: 0 0 5px #fff;
+  background-color: rgba(50, 50, 50, 0.2);
+  border-color: #fff;
 }
 
 /* Navigation link styles */
@@ -54,11 +57,11 @@ nav a {
   border-radius: 4px;
 }
 nav a:visited, a:link {
-  color: #607D8B;
+  color: #607d8b;
 }
 nav a:hover {
   color: #039be5;
-  background-color: #CFD8DC;
+  background-color: #cfd8dc;
 }
 nav a.active {
   color: #039be5;

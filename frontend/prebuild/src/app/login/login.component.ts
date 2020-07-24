@@ -31,9 +31,20 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
-  party: string;
   queuePosition: number;
   player = new Player();
+  nextAiName: string;
+  aiName: string;
+  hasBotKey = false;
+  botKey: string;
+
+  private partyCode = '';
+  get party(): string {
+    return this.partyCode.toLocaleUpperCase().trim();
+  }
+  set party(newParty: string) {
+    this.partyCode = newParty;
+  }
 
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   isQuickPlayAllowed: boolean = this.isFullDevice;
@@ -382,5 +393,54 @@ export class LoginComponent implements OnInit, OnDestroy {
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('userId');
     this.pane = 'left';
+  }
+
+  makeId() {
+   let result           = '';
+   let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+   let charactersLength = characters.length;
+   for (let i = 1; i <= 16; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      if (i % 4 === 0 && i !== 16) {
+          result += '-';
+      }
+   }
+   return result;
+  }
+
+  showBotLogin() {
+     this.pane = 'ai';
+  }
+
+  async doneRegisteringBots() {
+    this.pane = 'left';
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    this.hasBotKey = false;
+    this.botKey = null;
+    this.aiName = null;
+    this.nextAiName = null;
+  }
+
+  async registerBot(name: string) {
+    console.log(`Bot name input: "${name}"`);
+
+    // ensure username is valid before creating
+    let usernameError = this.validateUsername(name);
+    if (usernameError !== null) {
+      alert(usernameError);
+      return false;
+    }
+    name = name.trim();
+
+    let userId = this.makeId();
+    console.log(`id: ${userId}`);
+    // register a new user
+    let key: any = await this.http.post(`${environment.API_URL_PLAYERS}?name=${name}&id=${userId}`, '', {
+      responseType: 'text'
+    }).toPromise();
+
+    this.hasBotKey = true;
+    this.botKey = userId;
+    this.aiName = name;
   }
 }
