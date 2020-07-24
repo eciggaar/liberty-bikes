@@ -3,6 +3,7 @@ build
 **/.project
 **/.gradle/
 **/.DS_Store
+**/.classpath
 .vscode
 /*/bin/
 /*/build/
