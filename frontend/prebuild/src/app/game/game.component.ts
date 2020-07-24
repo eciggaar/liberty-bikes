@@ -57,6 +57,12 @@ export class GameComponent implements OnInit, OnDestroy {
       }
       case GameState.Playing: {
         this.gameButtonText = 'Start Game';
+
+        // Firefox on Windows: focus gets stuck on the button if clicked,
+        // and no keyboard events are sent to the game. Remove the
+        // focus when the game starts.
+        document.getElementById('gameButton').blur();
+
         this.gameButtonDisabled = true;
         break;
       }
@@ -198,13 +204,13 @@ export class GameComponent implements OnInit, OnDestroy {
     window.onkeydown = (e: KeyboardEvent): any => {
       const key = e.keyCode ? e.keyCode : e.which;
 
-      if (key === 38) {
+      if (key === 38 || key === 87) {
         this.moveUp();
-      } else if (key === 40) {
+      } else if (key === 40 || key === 83) {
         this.moveDown();
-      } else if (key === 37) {
+      } else if (key === 37 || key === 65) {
         this.moveLeft();
-      } else if (key === 39) {
+      } else if (key === 39 || key === 68) {
         this.moveRight();
       }
     };

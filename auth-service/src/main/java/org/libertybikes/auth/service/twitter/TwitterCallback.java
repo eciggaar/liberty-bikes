@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.auth.service.ConfigBean;
 import org.libertybikes.auth.service.JwtAuth;
 
@@ -31,6 +32,10 @@ public class TwitterCallback extends JwtAuth {
     ConfigBean config;
 
     @GET
+    @Counted(name = "num_twitter_logins",
+             displayName = "Number of Twitter Logins",
+             description = "How many times a user has logged in through Twitter Auth.",
+             absolute = true)
     public Response getTwitterCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
             Twitter twitter = (Twitter) request.getSession().getAttribute("twitter");

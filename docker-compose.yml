@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
   frontend:
     build: frontend
@@ -26,3 +26,29 @@ services:
     image: libertybikes-player
     ports:
       - "8081:8081"
+    environment:
+      - DB_HOST=postgres
+  postgres:
+    image: postgres:11-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=playerdb
+      - POSTGRES_USER=lb_user
+      - POSTGRES_PASSWORD=lb_password
+  prometheus:
+    image: prom/prometheus:v2.4.0
+    ports:
+      - 9090:9090
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus
+  grafana:
+    image: grafana/grafana:5.2.4
+    ports:
+      - 3000:3000
+    environment:
+      - GF_INSTALL_PLUGINS=flant-statusmap-panel
+    volumes:
+      - ./monitoring/datasource:/etc/grafana/provisioning/datasources
+      - ./monitoring/dashboardList:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafanaDashboardConfig:/var/lib/grafana/dashboards

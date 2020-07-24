@@ -18,11 +18,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.auth.service.ConfigBean;
 import org.libertybikes.auth.service.JwtAuth;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -85,21 +87,27 @@ public class GoogleCallback extends JwtAuth {
     }
 
     @GET
+    @Counted(name = "num_google_logins",
+             displayName = "Number of Google Logins",
+             description = "How many times a user has logged in through Google Auth.",
+             absolute = true)
     public Response getGoogleAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
         // google calls us back at this app when a user has finished authing with them.
         // when it calls us back here, it passes an oauth_verifier token that we
         // can exchange for a google access token.
 
         GoogleAuthorizationCodeFlow flow = (GoogleAuthorizationCodeFlow) request.getSession().getAttribute("google");
+        if (flow == null)
+            return failureRedirect("did not find 'google' attribute set in HTTP session. It should be set by GoogleAuth");
         String code = request.getParameter("code");
 
         //now we need to invoke the access_token endpoint to swap the code for a token.
         String callbackURL = config.authUrl + "/GoogleCallback";
 
-        GoogleTokenResponse gResponse;
         Map<String, String> claims = new HashMap<String, String>();
         try {
-            gResponse = flow.newTokenRequest(code).setRedirectUri(callbackURL.toString()).execute();
+            GoogleAuthorizationCodeTokenRequest token = flow.newTokenRequest(code).setRedirectUri(callbackURL);
+            GoogleTokenResponse gResponse = token.execute();
             claims.putAll(introspectAuth(flow, gResponse));
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,10 +115,15 @@ public class GoogleCallback extends JwtAuth {
 
         // if auth key was no longer valid, we won't build a JWT. Redirect back to start.
         if (!"true".equals(claims.get("valid"))) {
-            return Response.temporaryRedirect(new URI(config.frontendUrl)).build();
+            return failureRedirect("claim was not valid");
         } else {
             String newJwt = createJwt(claims);
             return Response.temporaryRedirect(new URI(config.frontendUrl + "/" + newJwt)).build();
         }
+    }
+
+    private Response failureRedirect(String reason) throws URISyntaxException {
+        System.out.println("Google auth failed because " + reason);
+        return Response.temporaryRedirect(new URI(config.frontendUrl)).build();
     }
 }
