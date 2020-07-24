@@ -14,6 +14,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetadataBuilder;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.MetricType;
 import org.libertybikes.player.data.PlayerDB;
 
 @Path("/player")
@@ -32,6 +36,16 @@ public class PlayerService {
         return db.getAll();
     }
 
+    @Inject
+    private MetricRegistry registry;
+
+    private static final Metadata numLoginsCounter = new MetadataBuilder()
+                    .withName("num_player_logins")
+                    .withDisplayName("Number of Total Logins")
+                    .withDescription("How many times a user has logged in.")
+                    .withType(MetricType.COUNTER)
+                    .build();
+
     @POST
     @Produces(MediaType.TEXT_HTML)
     public String createPlayer(@QueryParam("name") String name, @QueryParam("id") String id) {
@@ -49,6 +63,10 @@ public class PlayerService {
             System.out.println("Created a new player with id=" + p.id);
         else
             System.out.println("A player already existed with id=" + p.id);
+
+        if (id != null && registry != null) {
+            registry.counter(numLoginsCounter).inc();
+        }
         return p.id;
     }
 
@@ -79,14 +97,5 @@ public class PlayerService {
         }
         map.put("id", id);
         return map;
-    } 
-    
-	/*@GET
-    @Path("/getTestString")
-    public HashMap<String, String> getTestString() {
-    	
-    	HashMap<String, String> map = new HashMap<String, String>();
-    	map.put("result","test string");
-    	return map;
-    }*/
+    }
 }
