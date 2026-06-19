@@ -1,22 +1,25 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "downlevelIteration": true,
+    "ignoreDeprecations": "6.0",
     "importHelpers": true,
     "module": "esnext",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2015",
+    "target": "ES2022",
+    "useDefineForClassFields": false,
     "typeRoots": [
       "node_modules/@types"
     ],
     "lib": [
-      "es2017",
+      "ES2022",
       "dom"
-    ]
+    ],
+    "strict": false,
+    "skipLibCheck": true
   }
 }
