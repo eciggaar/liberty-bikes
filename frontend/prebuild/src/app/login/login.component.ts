@@ -13,6 +13,7 @@ import { Player } from '../entity/player';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  standalone: false,
   animations: [
     trigger('sso', [
       transition(':enter', [

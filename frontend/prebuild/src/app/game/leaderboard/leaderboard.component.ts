@@ -9,6 +9,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
   selector: 'app-rank-list',
   templateUrl: './leaderboard.component.html',
   styleUrls: ['./leaderboard.component.scss'],
+  standalone: false,
   animations: [
     trigger('swap', [
       transition(':enter', [

@@ -6,7 +6,8 @@ import { Assets } from '../assets';
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
-  styleUrls: ['./player.component.scss']
+  styleUrls: ['./player.component.scss'],
+  standalone: false
 })
 export class PlayerComponent implements OnInit {
   @Input() player: Player;

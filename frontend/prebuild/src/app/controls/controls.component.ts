@@ -13,6 +13,7 @@ import { environment } from './../../environments/environment';
   templateUrl: './controls.component.html',
   styleUrls: ['./controls.component.scss'],
   providers: [ GameService ],
+  standalone: false
 })
 export class ControlsComponent implements OnInit, OnDestroy {
   windowHeight = window.innerHeight;

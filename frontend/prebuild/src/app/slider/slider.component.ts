@@ -6,6 +6,7 @@ import { trigger, state, style, transition, animate, query, group, animateChild 
   templateUrl: './slider.component.html',
   styleUrls: ['./slider.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
   animations: [
     trigger('slide', [
       state('left', style({ transform: 'translateX(0)' })),

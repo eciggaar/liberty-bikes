@@ -25,6 +25,7 @@ enum GameState {
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
   providers: [ GameService ],
+  standalone: false
 })
 export class GameComponent implements OnInit, OnDestroy {
   roundId: string;

@@ -7,6 +7,7 @@ import { PlayersService } from './players.service';
   templateUrl: './playerlist.component.html',
   styleUrls: ['./playerlist.component.scss'],
   providers: [ PlayersService ],
+  standalone: false
 })
 export class PlayerListComponent implements OnInit {
   players: Player[] = new Array();

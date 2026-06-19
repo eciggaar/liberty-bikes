@@ -7,7 +7,8 @@ import { PlayersService } from './game/playerlist/players.service';
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  providers: [ SocketService, GameService, PlayersService ]
+  providers: [ SocketService, GameService, PlayersService ],
+  standalone: false
 })
 export class AppComponent {
   title = 'Liberty Bikes';
