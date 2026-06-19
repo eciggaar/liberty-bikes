@@ -2,7 +2,7 @@ import { Component, OnInit, NgZone } from '@angular/core';
 import { Ranking } from './ranking/ranking';
 import { HttpClient } from '@angular/common/http';
 import { environment } from './../../../environments/environment';
-import { timer } from 'rxjs/observable/timer';
+import { timer } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({

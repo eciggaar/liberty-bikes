@@ -1,0 +1,1 @@
+{"ast":null,"code":"export class Point {\n  constructor(x, y) {\n    this.x = x;\n    this.y = y;\n  }\n\n}","map":null,"metadata":{},"sourceType":"module"}

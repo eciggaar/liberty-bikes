@@ -1,0 +1,1 @@
+{"ast":null,"code":"export class Ranking {\n  constructor(rank, name, numWins, totalGames, rating) {\n    this.rank = rank;\n    this.name = name;\n    this.numWins = numWins;\n    this.totalGames = totalGames;\n    this.winLossRatio = totalGames === 0 ? 0 : numWins / totalGames * 100;\n    this.rating = rating;\n  }\n\n}","map":null,"metadata":{},"sourceType":"module"}
