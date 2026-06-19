@@ -7,7 +7,9 @@ ext {
 liberty {
 	server {
 		name = 'player-service'
-		dropins = [war]
+		deploy {
+			apps = [war]
+		}
 		configDirectory = file('src/main/liberty/config')
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
 	}
@@ -18,8 +20,10 @@ configurations {
 }
 
 dependencies {
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-    postgresql group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
+    postgresql group: 'org.postgresql', name: 'postgresql', version: '42.7.3'
 }
 
 task addPostgresqlToServer(type: Copy) {
@@ -34,7 +38,7 @@ task addPostgresqlToBuild(type: Copy) {
 }
 
 assemble.dependsOn 'addPostgresqlToBuild'
-installApps.dependsOn 'addPostgresqlToServer'
+deploy.dependsOn 'addPostgresqlToServer'
 
 // The installLiberty task doesn't work when run in parallel with other installLiberty tasks, skip this one when project property 'iks'
 // is set

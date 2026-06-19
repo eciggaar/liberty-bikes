@@ -3,12 +3,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.5'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.8.2'
     }
 }
 
 plugins {
-    id 'com.avast.gradle.docker-compose' version "0.9.1"
+    id 'com.avast.gradle.docker-compose' version "0.17.7"
 }
 
 task clean(type: Delete) {
@@ -49,15 +49,23 @@ composeUp {
 subprojects {
     apply plugin: 'liberty'
     apply plugin: 'war'
+    apply plugin: 'java'
 
-    sourceCompatibility = 1.8
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 
     buildscript {
         repositories {
             mavenCentral()
         }
         dependencies {
-            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.5'
+            classpath 'io.openliberty.tools:liberty-gradle-plugin:3.8.2'
         }
     }
 
@@ -66,11 +74,12 @@ subprojects {
     }
 
     dependencies {
-        providedCompile group: 'org.eclipse.microprofile', name: 'microprofile', version: '3.0'
-        providedCompile group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '8.0.0'
-        testCompile group: 'junit', name: 'junit', version: '4.12'
-        testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.5'
-        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '19.0.0.9'
+        compileOnly group: 'org.eclipse.microprofile', name: 'microprofile', version: '7.0'
+        compileOnly group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.2'
+        testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
+        testImplementation group: 'org.eclipse', name: 'yasson', version: '3.0.3'
+        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '26.0.0.6'
     }
     
     eclipse {

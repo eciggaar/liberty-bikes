@@ -7,16 +7,21 @@ ext {
 liberty {
 	server {
 		name = 'auth-service'
-		dropins = [war]
+		deploy {
+			apps = [war]
+		}
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
 		configDirectory = file('src/main/liberty/config')
 	}
 }
 
 dependencies {
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-    compile group: 'com.google.api-client', name: 'google-api-client', version: '1.30.4'
-    compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.7'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
+    implementation group: 'com.google.api-client', name: 'google-api-client', version: '2.6.0'
+    implementation group: 'com.google.http-client', name: 'google-http-client-jackson2', version: '1.44.2'
+    implementation group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.7'
 }
 
 // The installLiberty task doesn't work when run in parallel with other installLiberty tasks, skip this one when project property 'iks'

@@ -1,11 +1,11 @@
 package org.libertybikes.player.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.libertybikes.player.service.RankingService.ratingChange;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.libertybikes.player.data.InMemPlayerDB;
 import org.libertybikes.player.data.PlayerDB;
 
@@ -17,7 +17,7 @@ public class RankingServiceTest {
 
     RankingService ranks;
 
-    @Before
+    @BeforeEach
     public void beforeEach() {
         PlayerDB db = new InMemPlayerDB();
         players = new PlayerService();

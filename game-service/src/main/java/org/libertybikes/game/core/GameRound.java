@@ -22,15 +22,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import javax.enterprise.concurrent.LastExecution;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
-import javax.enterprise.concurrent.Trigger;
-import javax.enterprise.inject.spi.CDI;
-import javax.json.bind.annotation.JsonbPropertyOrder;
-import javax.json.bind.annotation.JsonbTransient;
+import jakarta.enterprise.concurrent.LastExecution;
+import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
+import jakarta.enterprise.concurrent.Trigger;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.json.bind.annotation.JsonbPropertyOrder;
+import jakarta.json.bind.annotation.JsonbTransient;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 
 import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -112,7 +112,8 @@ public class GameRound implements Runnable {
         // Get game tick speed
         Integer tickSpeed = GAME_TICK_SPEED_DEFAULT;
         try {
-            tickSpeed = InitialContext.doLookup("round/gameSpeed");
+            InitialContext ctx = new InitialContext();
+            tickSpeed = (Integer) ctx.lookup("round/gameSpeed");
         } catch (Exception e) {
             log("Unable to perform JNDI lookup to determine game tick speed, using default value");
         }
@@ -121,15 +122,15 @@ public class GameRound implements Runnable {
         // Get delay between rounds
         Integer maxTimeBetweenRounds = MAX_TIME_BETWEEN_ROUNDS_DEFAULT;
         try {
-            maxTimeBetweenRounds = InitialContext.doLookup("round/autoStartCooldown");
+            InitialContext ctx = new InitialContext();
+            maxTimeBetweenRounds = (Integer) ctx.lookup("round/autoStartCooldown");
         } catch (Exception e) {
             log("Unable to perform JNDI lookup to determine time between rounds, using default value");
         }
         MAX_TIME_BETWEEN_ROUNDS = (maxTimeBetweenRounds < 5 || maxTimeBetweenRounds > 60) ? MAX_TIME_BETWEEN_ROUNDS_DEFAULT : maxTimeBetweenRounds;
 
         // Increment round counter metrics
-        GameMetrics.counterInc(GameMetrics.totalRoundsCounter);
-        GameMetrics.counterInc(GameMetrics.currentRoundsCounter);
+        GameMetrics.incrementCurrentRounds();
     }
 
     public GameBoard getBoard() {
@@ -200,10 +201,9 @@ public class GameRound implements Runnable {
             log("Player " + playerId + " has joined.");
 
             // Increment player counter metrics
-            GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
-            GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
+            GameMetrics.incrementCurrentPlayers();
             if (isPhone) {
-                GameMetrics.counterInc(GameMetrics.totalMobilePlayersCounter);
+                GameMetrics.incrementMobilePlayers();
             }
 
         } else {
@@ -274,11 +274,8 @@ public class GameRound implements Runnable {
         if (isOpen()) {
             board.removePlayer(p);
 
-            // Decrement player counters because they didn't play
-            GameMetrics.counterDec(GameMetrics.totalPlayersCounter);
-            if (isMobile) {
-                GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);
-            }
+            // Note: We don't decrement total counters, only current players
+            // Total counters are cumulative
 
         } else if (gameState == State.RUNNING) {
             checkForWinner();
@@ -288,7 +285,7 @@ public class GameRound implements Runnable {
             broadcastPlayerList();
 
         // Decrement current players counter
-        GameMetrics.counterDec(GameMetrics.currentPlayersCounter);
+        GameMetrics.decrementCurrentPlayers();
     }
 
     /**
@@ -360,39 +357,25 @@ public class GameRound implements Runnable {
         }
 
         try {
-            Claims onwardsClaims = Jwts.claims();
-
-            onwardsClaims.put("upn", "game-service");
-            onwardsClaims.put("groups", "admin");
-            // Set the subject using the "id" field from our claims map.
-            onwardsClaims.setSubject(id);
-
-            onwardsClaims.setId(id);
-
-            // We'll use this claim to know this is a user token
-            onwardsClaims.setAudience("client");
-
-            onwardsClaims.setIssuer("https://libertybikes.mybluemix.net");
-            // we set creation time to 24hrs ago, to avoid timezone issues in the
-            // browser verification of the jwt.
+            // Calculate timestamps
             Calendar calendar1 = Calendar.getInstance();
             calendar1.add(Calendar.HOUR, -24);
-            onwardsClaims.setIssuedAt(calendar1.getTime());
-
-            // client JWT has 24 hrs validity from now.
             Calendar calendar2 = Calendar.getInstance();
             calendar2.add(Calendar.HOUR, 48);
-            onwardsClaims.setExpiration(calendar2.getTime());
 
-            // finally build the new jwt, using the claims we just built, signing it
-            // with our signing key, and adding a key hint as kid to the encryption header,
-            // which is optional, but can be used by the receivers of the jwt to know which
-            // key they should verify it with.
+            // Build JWT using JJWT 0.12.6 API
             jwt = Jwts.builder()
                             .setHeaderParam("kid", "bike")
                             .setHeaderParam("alg", "RS256")
-                            .setClaims(onwardsClaims)
-                            .signWith(SignatureAlgorithm.RS256, signingKey)
+                            .claim("upn", "game-service")
+                            .claim("groups", "admin")
+                            .setSubject(id)
+                            .setId(id)
+                            .setAudience("client")
+                            .setIssuer("https://libertybikes.mybluemix.net")
+                            .setIssuedAt(calendar1.getTime())
+                            .setExpiration(calendar2.getTime())
+                            .signWith(signingKey)
                             .compact();
             return jwt;
         } catch (Throwable e) {
@@ -406,10 +389,10 @@ public class GameRound implements Runnable {
             return;
         try {
             // load up the keystore
-
-            keyStore = InitialContext.doLookup("jwtKeyStore");
-            keyStorePW = InitialContext.doLookup("jwtKeyStorePassword");
-            keyStoreAlias = InitialContext.doLookup("jwtKeyStoreAlias");
+            InitialContext ctx = new InitialContext();
+            keyStore = (String) ctx.lookup("jwtKeyStore");
+            keyStorePW = (String) ctx.lookup("jwtKeyStorePassword");
+            keyStoreAlias = (String) ctx.lookup("jwtKeyStoreAlias");
 
             FileInputStream is = new FileInputStream(keyStore);
 
@@ -549,7 +532,7 @@ public class GameRound implements Runnable {
         log("<<< Finished round");
 
         // Decrement current rounds counter and close round timer
-        GameMetrics.counterDec(GameMetrics.currentRoundsCounter);
+        GameMetrics.decrementCurrentRounds();
         if (timerContext != null)
             timerContext.close();
 
@@ -577,8 +560,9 @@ public class GameRound implements Runnable {
 
     private ManagedScheduledExecutorService executor() {
         try {
-            return InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
-        } catch (NamingException e) {
+            InitialContext ctx = new InitialContext();
+            return (ManagedScheduledExecutorService) ctx.lookup("java:comp/DefaultManagedScheduledExecutorService");
+        } catch (Exception e) {
             log("Unable to obtain ManagedScheduledExecutorService");
             e.printStackTrace();
             return null;
@@ -614,7 +598,7 @@ public class GameRound implements Runnable {
             gameState = State.RUNNING;
 
             // Start round timer metric
-            timerContext = GameMetrics.timerStart(GameMetrics.gameRoundTimerMetadata);
+            timerContext = GameMetrics.startGameRoundTimer();
         }
     }
 

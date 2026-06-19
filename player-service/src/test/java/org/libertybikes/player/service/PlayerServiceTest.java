@@ -1,17 +1,17 @@
 package org.libertybikes.player.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.libertybikes.player.data.InMemPlayerDB;
 
 public class PlayerServiceTest {
 
     PlayerService svc;
 
-    @Before
+    @BeforeEach
     public void beforeEach() {
         svc = new PlayerService();
         svc.db = new InMemPlayerDB();

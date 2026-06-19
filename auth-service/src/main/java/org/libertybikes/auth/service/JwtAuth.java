@@ -8,14 +8,13 @@ import java.security.KeyStore;
 import java.util.Calendar;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 /**
  * A base class for bikes auth implementations that return signed JWTs to the client.
@@ -65,41 +64,35 @@ public abstract class JwtAuth {
             getKeyStoreInfo();
         }
 
-        Claims onwardsClaims = Jwts.claims();
-
-        // Add all the remaining claims as-is.
-        onwardsClaims.putAll(claims);
-
-        // Set the subject using the "id" field from our claims map.
-        onwardsClaims.setSubject(claims.get("id"));
-
-        onwardsClaims.setId(claims.get("id"));
-
-        // We'll use this claim to know this is a user token
-        onwardsClaims.setAudience("client");
-
-        onwardsClaims.setIssuer("https://libertybikes.mybluemix.net");
         // we set creation time to 24hrs ago, to avoid timezone issues in the
         // browser verification of the jwt.
         Calendar calendar1 = Calendar.getInstance();
         calendar1.add(Calendar.HOUR, -24);
-        onwardsClaims.setIssuedAt(calendar1.getTime());
 
         // client JWT has 24 hrs validity from now.
         Calendar calendar2 = Calendar.getInstance();
         calendar2.add(Calendar.HOUR, 24);
-        onwardsClaims.setExpiration(calendar2.getTime());
 
         // finally build the new jwt, using the claims we just built, signing it
         // with our signing key, and adding a key hint as kid to the encryption header,
         // which is optional, but can be used by the receivers of the jwt to know which
         // key they should verify it with.
-        return Jwts.builder()
+        JwtBuilder builder = Jwts.builder()
                         .setHeaderParam("kid", "bike")
                         .setHeaderParam("alg", "RS256")
-                        .setClaims(onwardsClaims)
-                        .signWith(SignatureAlgorithm.RS256, signingKey)
-                        .compact();
+                        .setSubject(claims.get("id"))
+                        .setId(claims.get("id"))
+                        .setAudience("client")
+                        .setIssuer("https://libertybikes.mybluemix.net")
+                        .setIssuedAt(calendar1.getTime())
+                        .setExpiration(calendar2.getTime());
+        
+        // Add all custom claims
+        for (Map.Entry<String, String> entry : claims.entrySet()) {
+            builder.claim(entry.getKey(), entry.getValue());
+        }
+        
+        return builder.signWith(signingKey).compact();
     }
 
 }

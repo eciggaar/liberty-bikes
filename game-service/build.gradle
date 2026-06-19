@@ -1,5 +1,7 @@
 dependencies {
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
 }
 
 ext {
@@ -11,7 +13,9 @@ ext {
 liberty {
 	server {
 		name = 'game-service'
-		dropins = [war]
+		deploy {
+			apps = [war]
+		}
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
 		configDirectory = file('src/main/liberty/config')
 		jvmOptions = ['-DsingleParty=' + System.getProperty('singleParty', 'true')]

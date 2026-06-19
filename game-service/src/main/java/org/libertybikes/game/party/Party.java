@@ -2,13 +2,13 @@ package org.libertybikes.game.party;
 
 import java.util.Random;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.json.bind.annotation.JsonbTransient;
-import javax.ws.rs.sse.Sse;
-import javax.ws.rs.sse.SseEventSink;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.ws.rs.sse.Sse;
+import jakarta.ws.rs.sse.SseEventSink;
 
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.game.core.GameRound;
@@ -33,12 +33,12 @@ public class Party {
 
     @PostConstruct
     public void postConstruct() {
-        GameMetrics.counterInc(GameMetrics.currentPartiesCounterMetadata);
+        GameMetrics.incrementCurrentParties();
     }
 
     @PreDestroy
     public void preDestroy() {
-        GameMetrics.counterDec(GameMetrics.currentPartiesCounterMetadata);
+        GameMetrics.decrementCurrentParties();
     }
 
     @Inject

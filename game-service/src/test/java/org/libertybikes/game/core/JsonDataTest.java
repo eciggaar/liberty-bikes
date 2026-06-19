@@ -1,15 +1,15 @@
 package org.libertybikes.game.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.libertybikes.game.core.InboundMessage.GameEvent;
 import org.libertybikes.game.core.OutboundMessage.PlayerList;
 import org.libertybikes.game.core.OutboundMessage.RequeueGame;
@@ -139,7 +139,7 @@ public class JsonDataTest {
     }
 
     private void assertContains(String expected, String search) {
-        assertTrue("Did not find '" + expected + "' inside of the string: " + search, search.contains(expected));
+        assertTrue(search.contains(expected), "Did not find '" + expected + "' inside of the string: " + search);
     }
 
 }

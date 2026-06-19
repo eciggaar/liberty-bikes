@@ -3,88 +3,43 @@
  */
 package org.libertybikes.game.metric;
 
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetadataBuilder;
+import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.Timer.Context;
+import org.eclipse.microprofile.metrics.Tag;
+import org.eclipse.microprofile.metrics.Timer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameMetrics {
-    // MpMetric Metadatas
-    public static final Metadata currentRoundsCounter = new MetadataBuilder()
-                    .withName("current_num_of_rounds")
-                    .withDisplayName("Current Number of Rounds")
-                    .withDescription("Number of rounds currently running")
-                    .withType(MetricType.CONCURRENT_GAUGE)
-                    .build();
+    // Metric names
+    private static final String CURRENT_ROUNDS = "current_num_of_rounds";
+    private static final String TOTAL_ROUNDS = "total_num_of_rounds";
+    private static final String CURRENT_PLAYERS = "current_num_of_players";
+    private static final String TOTAL_PLAYERS = "total_num_of_players";
+    private static final String TOTAL_MOBILE_PLAYERS = "total_num_of_mobile_players";
+    private static final String GAME_ROUND_TIMER = "game_round_timer";
+    private static final String CURRENT_PARTIES = "current_number_of_parties";
+    private static final String CURRENT_QUEUED_PLAYERS = "current_num_of_players_in_queue";
+    private static final String OPEN_WEBSOCKET_TIMER = "open_game_websocket_timer";
 
-    public static final Metadata totalRoundsCounter = new MetadataBuilder()
-                    .withName("total_num_of_rounds")
-                    .withDisplayName("Total Number of Rounds")
-                    .withDescription("Number of rounds that have been created")
-                    .withType(MetricType.COUNTER)
-                    .build();
-
-    public static final Metadata currentPlayersCounter = new MetadataBuilder()
-                    .withName("current_num_of_players")
-                    .withDisplayName("Current Number of Players")
-                    .withDescription("Number of players that are currently playing in a round")
-                    .withType(MetricType.CONCURRENT_GAUGE)
-                    .build();
-
-    public static final Metadata totalPlayersCounter = new MetadataBuilder()
-                    .withName("total_num_of_players")
-                    .withDisplayName("Total Number of Players That Have Played")
-                    .withDescription("Number of players that have played in a round, requeuing and replaying increases the count")
-                    .withType(MetricType.COUNTER)
-                    .build();
-
-    public static final Metadata totalMobilePlayersCounter = new MetadataBuilder()
-                    .withName("total_num_of_mobile_players")
-                    .withDisplayName("Total Number of Mobile Players That Have Played")
-                    .withDescription("Number of mobile players that have played in a round, requeuing and replaying increases the count")
-                    .withType(MetricType.COUNTER)
-                    .build();
-
-    public static final Metadata gameRoundTimerMetadata = new MetadataBuilder()
-                    .withName("game_round_timer")
-                    .withDisplayName("Game Round Timer")
-                    .withDescription("The Time Game Rounds Last")
-                    .withType(MetricType.TIMER)
-                    .withUnit(MetricUnits.SECONDS)
-                    .build();
-
-    public static final Metadata currentPartiesCounterMetadata = new MetadataBuilder()
-                    .withName("current_number_of_parties")
-                    .withDisplayName("Current Number of Parties")
-                    .withDescription("Number of parties currently running")
-                    .withType(MetricType.CONCURRENT_GAUGE)
-                    .build();
-
-    public static final Metadata currentQueuedPlayersCounter = new MetadataBuilder()
-                    .withName("current_num_of_players_in_queue")
-                    .withDisplayName("Current Number of Players Waiting In A Queue")
-                    .withDescription("Number of players that are currently waiting in a queue")
-                    .withType(MetricType.CONCURRENT_GAUGE)
-                    .build();
-
-    public static final Metadata openWebsocketTimerMetadata = new MetadataBuilder()
-                    .withName("open_game_websocket_timer")
-                    .withDisplayName("Open Game Round Websocket Timer")
-                    .withDescription("The Time Game Round Websockets Are Open")
-                    .withType(MetricType.TIMER)
-                    .withUnit(MetricUnits.SECONDS)
-                    .build();
+    // Atomic counters for gauges
+    private static final AtomicInteger currentRounds = new AtomicInteger(0);
+    private static final AtomicInteger currentPlayers = new AtomicInteger(0);
+    private static final AtomicInteger currentParties = new AtomicInteger(0);
+    private static final AtomicInteger currentQueuedPlayers = new AtomicInteger(0);
 
     private static MetricRegistry registry;
+    private static boolean metricsRegistered = false;
 
     private static MetricRegistry getRegistry() {
         try {
-            registry = CDI.current().select(MetricRegistry.class).get();
-            System.out.println("MetricRegistry configured");
+            if (registry == null) {
+                registry = CDI.current().select(MetricRegistry.class).get();
+                registerMetrics();
+                System.out.println("MetricRegistry configured");
+            }
             return registry;
         } catch (IllegalStateException ise) {
             System.out.println("WARNING: Unable to locate CDIProvider");
@@ -93,21 +48,86 @@ public class GameMetrics {
         return null;
     }
 
-    public static void counterInc(Metadata metricMetadata) {
+    private static void registerMetrics() {
+        if (metricsRegistered || registry == null) {
+            return;
+        }
+
+        // Register gauges - MicroProfile Metrics 5.0+ uses Supplier<T> where T extends Number
+        registry.gauge(CURRENT_ROUNDS, () -> currentRounds.get());
+        registry.gauge(CURRENT_PLAYERS, () -> currentPlayers.get());
+        registry.gauge(CURRENT_PARTIES, () -> currentParties.get());
+        registry.gauge(CURRENT_QUEUED_PLAYERS, () -> currentQueuedPlayers.get());
+
+        metricsRegistered = true;
+    }
+
+    public static void incrementCurrentRounds() {
         if (registry != null || (getRegistry() != null)) {
-            registry.concurrentGauge(metricMetadata).inc();
+            currentRounds.incrementAndGet();
+            registry.counter(TOTAL_ROUNDS).inc();
         }
     }
 
-    public static void counterDec(Metadata metricMetadata) {
+    public static void decrementCurrentRounds() {
         if (registry != null || (getRegistry() != null)) {
-            registry.concurrentGauge(metricMetadata).dec();
+            currentRounds.decrementAndGet();
         }
     }
 
-    public static Context timerStart(Metadata metricMetadata) {
+    public static void incrementCurrentPlayers() {
         if (registry != null || (getRegistry() != null)) {
-            return registry.timer(metricMetadata).time();
+            currentPlayers.incrementAndGet();
+            registry.counter(TOTAL_PLAYERS).inc();
+        }
+    }
+
+    public static void decrementCurrentPlayers() {
+        if (registry != null || (getRegistry() != null)) {
+            currentPlayers.decrementAndGet();
+        }
+    }
+
+    public static void incrementMobilePlayers() {
+        if (registry != null || (getRegistry() != null)) {
+            registry.counter(TOTAL_MOBILE_PLAYERS).inc();
+        }
+    }
+
+    public static void incrementCurrentParties() {
+        if (registry != null || (getRegistry() != null)) {
+            currentParties.incrementAndGet();
+        }
+    }
+
+    public static void decrementCurrentParties() {
+        if (registry != null || (getRegistry() != null)) {
+            currentParties.decrementAndGet();
+        }
+    }
+
+    public static void incrementQueuedPlayers() {
+        if (registry != null || (getRegistry() != null)) {
+            currentQueuedPlayers.incrementAndGet();
+        }
+    }
+
+    public static void decrementQueuedPlayers() {
+        if (registry != null || (getRegistry() != null)) {
+            currentQueuedPlayers.decrementAndGet();
+        }
+    }
+
+    public static Timer.Context startGameRoundTimer() {
+        if (registry != null || (getRegistry() != null)) {
+            return registry.timer(GAME_ROUND_TIMER).time();
+        }
+        return null;
+    }
+
+    public static Timer.Context startWebsocketTimer() {
+        if (registry != null || (getRegistry() != null)) {
+            return registry.timer(OPEN_WEBSOCKET_TIMER).time();
         }
         return null;
     }

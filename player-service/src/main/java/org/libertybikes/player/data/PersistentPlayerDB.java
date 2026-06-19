@@ -30,7 +30,8 @@ public class PersistentPlayerDB implements PlayerDB {
     private final DataSource ds;
 
     public PersistentPlayerDB() throws NamingException {
-        ds = InitialContext.doLookup("java:comp/DefaultDataSource");
+        InitialContext ctx = new InitialContext();
+        ds = (DataSource) ctx.lookup("java:comp/DefaultDataSource");
     }
 
     public boolean isAvailable() {

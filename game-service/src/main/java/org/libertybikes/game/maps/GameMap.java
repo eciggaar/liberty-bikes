@@ -22,7 +22,8 @@ public class GameMap {
      */
     public static GameMap create(int map) {
         try {
-            int mapOverride = InitialContext.doLookup("round/map");
+            InitialContext ctx = new InitialContext();
+            int mapOverride = (Integer) ctx.lookup("round/map");
             if (mapOverride >= 0 && mapOverride <= NUM_MAPS) {
                 map = mapOverride;
                 System.out.println("Overriding map selection to map #" + map);

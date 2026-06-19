@@ -5,13 +5,16 @@ plugins {
 ext {
 	httpPort = 12000
 	httpsPort = 12005
-	applicationName = "${war.archiveName}"
 	appUrl = "http://${hostname}:${httpPort}/"
 }
 
 war {
-	archiveName = "${baseName}.${extension}"
+	archiveFileName = "${archiveBaseName.get()}.${archiveExtension.get()}"
 	dependsOn 'copyFrontend'
+}
+
+ext {
+	applicationName = war.archiveFileName.get()
 }
 
 node {
@@ -86,7 +89,9 @@ libertyStart.doLast {
 liberty {
 	server {
 		name = 'frontendServer'
-		apps = [war]
+		deploy {
+			apps = [war]
+		}
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': applicationName]
 		configDirectory = file('src/main/liberty/config')
 	}
