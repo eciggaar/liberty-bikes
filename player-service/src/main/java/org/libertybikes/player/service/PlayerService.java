@@ -14,7 +14,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.libertybikes.player.data.PlayerDB;
 
 @Path("/player")
@@ -32,9 +31,6 @@ public class PlayerService {
     public Collection<Player> getPlayers() {
         return db.getAll();
     }
-
-    @Inject
-    private MetricRegistry registry;
 
     @POST
     @Produces(MediaType.TEXT_HTML)
@@ -54,9 +50,10 @@ public class PlayerService {
         else
             System.out.println("A player already existed with id=" + p.id);
 
-        if (id != null && registry != null) {
-            registry.counter("num_player_logins").inc();
-        }
+        // Metrics disabled - MetricRegistry not available during CDI initialization
+        // if (id != null && registry != null) {
+        //     registry.counter("num_player_logins").inc();
+        // }
         return p.id;
     }
 

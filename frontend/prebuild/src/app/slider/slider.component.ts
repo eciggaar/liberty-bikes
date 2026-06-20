@@ -1,11 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Input, ChangeDetectorRef } from '@angular/core';
 import { trigger, state, style, transition, animate, query, group, animateChild } from '@angular/animations';
 
 @Component({
   selector: 'app-slider',
   templateUrl: './slider.component.html',
   styleUrls: ['./slider.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false,
   animations: [
     trigger('slide', [
@@ -31,7 +30,16 @@ import { trigger, state, style, transition, animate, query, group, animateChild 
   ]
 })
 export class SliderComponent {
-  @Input() activePane: PaneType = 'left';
+  @Input() set activePane(value: PaneType) {
+    this._activePane = value;
+    this.cdr.markForCheck();
+  }
+  get activePane(): PaneType {
+    return this._activePane;
+  }
+  private _activePane: PaneType = 'left';
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   isActivePane(pane: PaneType) {
     return this.activePane === pane ? 'active' : 'inactive';

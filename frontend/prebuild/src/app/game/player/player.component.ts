@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnChanges } from '@angular/core';
 import { Player } from '../../entity/player';
 import { Constants } from '../constants';
 import { Assets } from '../assets';
@@ -9,12 +9,17 @@ import { Assets } from '../assets';
   styleUrls: ['./player.component.scss'],
   standalone: false
 })
-export class PlayerComponent implements OnInit {
+export class PlayerComponent implements OnInit, OnChanges {
   @Input() player: Player;
   constructor() {
   }
 
   ngOnInit() {
+    console.log('PlayerComponent ngOnInit - player:', this.player);
+  }
+
+  ngOnChanges() {
+    console.log('PlayerComponent ngOnChanges - player:', this.player);
   }
 
   get style(): any {

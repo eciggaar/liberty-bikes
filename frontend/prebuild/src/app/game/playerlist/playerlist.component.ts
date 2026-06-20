@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { Player } from '../../entity/player';
 import { PlayersService } from './players.service';
 
@@ -10,42 +10,41 @@ import { PlayersService } from './players.service';
   standalone: false
 })
 export class PlayerListComponent implements OnInit {
-  players: Player[] = new Array();
+  players: Player[] = [];
 
-  constructor(private playersService: PlayersService, private ngZone: NgZone) {
-    playersService.messages.subscribe((msg) => {
+  constructor(
+    private playersService: PlayersService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit() {
+    this.playersService.messages.subscribe((msg) => {
       const json = msg as any;
       if (json.playerlist) {
-        // console.log(`Got playerlist ${JSON.stringify(json.playerlist)}`);
-        json.playerlist.forEach((player, i) => {
-          if (this.players.length > i) {
-            // Player already exists, compare
-            if (this.players[i].name !== player.name) {
-              this.players[i].name = player.name;
-            }
-
-            if (this.players[i].status !== player.status) {
-              this.players[i].status = player.status;
-            }
-
-            if (this.players[i].color !== player.color) {
-              this.players[i].color = player.color;
-            }
-          } else {
-            const newPlayer = new Player();
-            newPlayer.name = player.name;
-            newPlayer.status = player.status;
-            newPlayer.color = player.color;
-            this.players.push(newPlayer);
-          }
+        console.log(`Got playerlist ${JSON.stringify(json.playerlist)}`);
+        console.log(`Current players array length: ${this.players.length}`);
+        
+        // Clear and rebuild the array
+        const newPlayers: Player[] = [];
+        json.playerlist.forEach((player) => {
+          const newPlayer = new Player();
+          newPlayer.name = player.name;
+          newPlayer.status = player.status;
+          newPlayer.color = player.color;
+          newPlayers.push(newPlayer);
+        });
+        
+        this.ngZone.run(() => {
+          this.players = newPlayers;
+          console.log(`Updated players array length: ${this.players.length}`);
+          console.log(`Players array:`, this.players);
+          // Force change detection
+          this.cdr.detectChanges();
         });
       }
     }, (err) => {
       console.log(`Error occurred: ${err}`);
     });
-  }
-
-  ngOnInit() {
-
   }
 }

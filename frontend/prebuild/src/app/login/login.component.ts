@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone, HostBinding, Injectable } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, HostBinding, Injectable, ChangeDetectorRef } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -8,6 +8,7 @@ import { trigger, animate, style, transition, group, query, stagger, state } fro
 import { environment } from './../../environments/environment';
 import { PaneType } from '../slider/slider.component';
 import { Player } from '../entity/player';
+import { Constants } from '../game/constants';
 
 @Component({
   selector: 'app-login',
@@ -61,7 +62,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
     private meta: Meta,
     private http: HttpClient,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
 
@@ -87,6 +89,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (sessionStorage.getItem('username') !== null) {
       this.username = sessionStorage.getItem('username');
       this.player.name = this.username;
+      // User already logged in, show right pane
+      this.ngZone.run(() => {
+        this.pane = 'right';
+      });
     }
 
     // If a player has participated in a game and requeued and the next round is full, they will be redirected back to the login page.
@@ -328,7 +334,10 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   async loginAsGuest(username: string) {
     if (await this.createUser(username, sessionStorage.getItem('userId'))) {
-      this.pane = 'right';
+      this.ngZone.run(() => {
+        this.pane = 'right';
+        this.cdr.detectChanges();
+      });
     }
   }
 
@@ -364,7 +373,15 @@ export class LoginComponent implements OnInit, OnDestroy {
       responseType: 'text'
     }).toPromise();
     console.log('Created player: ' + JSON.stringify(createdUserId));
-    this.player.name = username;
+    this.ngZone.run(() => {
+      // Create new Player object to trigger Angular change detection
+      const newPlayer = new Player();
+      newPlayer.name = username;
+      newPlayer.color = Constants.GREEN_COLOR;
+      newPlayer.status = 'Connected';
+      this.player = newPlayer;
+      this.cdr.detectChanges();
+    });
     sessionStorage.setItem('username', username);
     sessionStorage.setItem('userId', createdUserId);
     return true;

@@ -22,7 +22,6 @@ import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.metrics.Timer;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.GameRound;
@@ -46,7 +45,7 @@ public class GameRoundWebsocket {
 
     private final static Jsonb jsonb = JsonbBuilder.create();
 
-    private Timer.Context timerContext;
+    private AutoCloseable timerContext;
 
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
@@ -61,10 +60,10 @@ public class GameRoundWebsocket {
     public void onClose(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Closed a session");
 
-        if (timerContext != null)
-            timerContext.close();
-
         try {
+            if (timerContext != null)
+                timerContext.close();
+
             GameRound round = gameSvc.getRound(roundId);
             if (round != null)
                 if (round.removeClient(session) == 0)

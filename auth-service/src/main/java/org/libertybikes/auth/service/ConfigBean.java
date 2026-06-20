@@ -39,27 +39,27 @@ public class ConfigBean {
     // Give the required config properties default values so that people don't need to set up
     // all auth types in order to use any of them (app deployment fails if any config can't be injected otherwise)
     @Inject
-    @ConfigProperty(name = GITHUB_KEY, defaultValue = "")
+    @ConfigProperty(name = GITHUB_KEY, defaultValue = "not_configured")
     public String github_key;
 
     @Inject
-    @ConfigProperty(name = GITHUB_SECRET, defaultValue = "")
+    @ConfigProperty(name = GITHUB_SECRET, defaultValue = "not_configured")
     public String github_secret;
 
     @Inject
-    @ConfigProperty(name = GOOGLE_KEY, defaultValue = "")
+    @ConfigProperty(name = GOOGLE_KEY, defaultValue = "not_configured")
     public String google_key;
 
     @Inject
-    @ConfigProperty(name = GOOGLE_SECRET, defaultValue = "")
+    @ConfigProperty(name = GOOGLE_SECRET, defaultValue = "not_configured")
     public String google_secret;
 
     @Inject
-    @ConfigProperty(name = TWITTER_KEY, defaultValue = "")
+    @ConfigProperty(name = TWITTER_KEY, defaultValue = "not_configured")
     public String twitter_key;
 
     @Inject
-    @ConfigProperty(name = TWITTER_SECRET, defaultValue = "")
+    @ConfigProperty(name = TWITTER_SECRET, defaultValue = "not_configured")
     public String twitter_secret;
 
     @PostConstruct

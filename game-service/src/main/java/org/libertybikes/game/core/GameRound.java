@@ -32,7 +32,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import jakarta.websocket.Session;
 
-import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
 import org.libertybikes.game.metric.GameMetrics;
@@ -91,7 +90,7 @@ public class GameRound implements Runnable {
 
     String keyStoreAlias;
 
-    private Context timerContext;
+    private AutoCloseable timerContext;
 
     // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -533,8 +532,14 @@ public class GameRound implements Runnable {
 
         // Decrement current rounds counter and close round timer
         GameMetrics.decrementCurrentRounds();
-        if (timerContext != null)
-            timerContext.close();
+        if (timerContext != null) {
+            try {
+                timerContext.close();
+            } catch (Exception e) {
+                System.err.println("Error closing timer context: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
         broadcastPlayerList();
 

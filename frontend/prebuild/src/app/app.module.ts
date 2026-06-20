@@ -16,6 +16,7 @@ import { PlayerListComponent } from './game/playerlist/playerlist.component';
 import { PlayerComponent } from './game/player/player.component';
 import { LeaderboardComponent } from './game/leaderboard/leaderboard.component';
 import { SliderComponent } from './slider/slider.component';
+import { SocketService } from './net/socket.service';
 
 @NgModule({
   imports: [
@@ -36,7 +37,7 @@ import { SliderComponent } from './slider/slider.component';
     LeaderboardComponent,
     SliderComponent,
   ],
-  providers: [ ],
+  providers: [ SocketService ],
   bootstrap: [ AppComponent ]
 })
 export class AppModule { }

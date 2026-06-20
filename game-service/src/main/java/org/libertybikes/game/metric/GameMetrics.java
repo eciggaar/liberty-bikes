@@ -10,6 +10,7 @@ import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.Timer;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameMetrics {
@@ -41,9 +42,9 @@ public class GameMetrics {
                 System.out.println("MetricRegistry configured");
             }
             return registry;
-        } catch (IllegalStateException ise) {
-            System.out.println("WARNING: Unable to locate CDIProvider");
-            ise.printStackTrace();
+        } catch (Throwable t) {
+            System.out.println("WARNING: Error getting MetricRegistry: " + t.getClass().getName() + ": " + t.getMessage());
+            t.printStackTrace();
         }
         return null;
     }
@@ -118,17 +119,21 @@ public class GameMetrics {
         }
     }
 
-    public static Timer.Context startGameRoundTimer() {
+    public static AutoCloseable startGameRoundTimer() {
         if (registry != null || (getRegistry() != null)) {
-            return registry.timer(GAME_ROUND_TIMER).time();
+            Timer timer = registry.timer(GAME_ROUND_TIMER);
+            long startTime = System.nanoTime();
+            return () -> timer.update(Duration.ofNanos(System.nanoTime() - startTime));
         }
-        return null;
+        return () -> {};
     }
 
-    public static Timer.Context startWebsocketTimer() {
+    public static AutoCloseable startWebsocketTimer() {
         if (registry != null || (getRegistry() != null)) {
-            return registry.timer(OPEN_WEBSOCKET_TIMER).time();
+            Timer timer = registry.timer(OPEN_WEBSOCKET_TIMER);
+            long startTime = System.nanoTime();
+            return () -> timer.update(Duration.ofNanos(System.nanoTime() - startTime));
         }
-        return null;
+        return () -> {};
     }
 }

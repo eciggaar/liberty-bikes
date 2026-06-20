@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { Ranking } from './ranking/ranking';
 import { HttpClient } from '@angular/common/http';
 import { environment } from './../../../environments/environment';
@@ -24,7 +24,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
   ]
 })
 export class LeaderboardComponent implements OnInit {
-  rankings: Ranking[] = new Array();
+  rankings: Ranking[] = [];
   board: LeaderboardType = 'wins';
 
   get currentBoard(): LeaderboardType {
@@ -35,11 +35,11 @@ export class LeaderboardComponent implements OnInit {
     this.board = newBoard;
   }
 
-
-
-  constructor(private ngZone: NgZone, private http: HttpClient) {
-
-  }
+  constructor(
+    private ngZone: NgZone,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.getLeaders();
@@ -52,13 +52,17 @@ export class LeaderboardComponent implements OnInit {
       let data = await this.http.get(`${environment.API_URL_RANKS}?limit=10`).toPromise();
       console.log(`Got leaders: ${JSON.stringify(data)}`);
       const json = data as any;
-      const rankingsArr = new Array();
+      const rankingsArr: Ranking[] = [];
       let i = 1;
       for (let ranking of json) {
         rankingsArr.push(new Ranking(i++, ranking.name, ranking.stats.numWins, ranking.stats.totalGames, ranking.stats.rating));
       }
+      
       this.ngZone.run(() => {
         this.rankings = rankingsArr;
+        console.log(`Updated rankings array length: ${this.rankings.length}`);
+        // Force change detection
+        this.cdr.detectChanges();
       });
 
     } catch (error) {

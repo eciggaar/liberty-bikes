@@ -1,4 +1,4 @@
-FROM open-liberty:19.0.0.9-microProfile3-java11
+FROM icr.io/appcafe/open-liberty:full-java21-openj9-ubi
 ADD --chown=1001:0 build/libs/game-service.war /config/dropins
 COPY --chown=1001:0 src/main/liberty/config /config/
 RUN printf 'httpPort=8080\n\
