@@ -1,4 +1,5 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { SliderComponent } from './slider.component';
 
@@ -8,7 +9,10 @@ describe('SliderComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ SliderComponent ]
+      declarations: [ SliderComponent ],
+      providers: [
+        provideNoopAnimations()  // Required: component uses animations
+      ]
     })
     .compileComponents();
   }));

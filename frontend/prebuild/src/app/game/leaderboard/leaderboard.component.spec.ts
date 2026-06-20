@@ -1,4 +1,6 @@
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 import { LeaderboardComponent } from './leaderboard.component';
 
@@ -8,7 +10,13 @@ describe('LeaderboardComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ LeaderboardComponent ]
+      declarations: [ LeaderboardComponent ],
+      imports: [
+        HttpClientTestingModule  // Required: component uses HttpClient
+      ],
+      providers: [
+        provideNoopAnimations()  // Required: component uses animations
+      ]
     })
     .compileComponents();
   }));
