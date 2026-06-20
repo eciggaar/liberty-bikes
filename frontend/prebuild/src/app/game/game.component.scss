@@ -1,3 +1,6 @@
+@use 'sass:color';
+@use 'sass:math';
+
 $titlebar: 75px;
 $navbar-border: 1px solid white;
 
@@ -172,7 +175,7 @@ $animationStyle:cubic-bezier(.23,.78,.69,.84);
 	position:fixed;
 	top:25%;
 	left:50%;
-	margin-left:-($loaderHeightWidth/2);
+	margin-left: -(math.div($loaderHeightWidth, 2));
 	height:$loaderHeightWidth;
 	width:$loaderHeightWidth;
 	background:transparent;
@@ -181,7 +184,7 @@ $animationStyle:cubic-bezier(.23,.78,.69,.84);
 		$loaderPrimaryColor
 		$loaderPrimaryColor
 		$loaderPrimaryColor
-		darken($loaderPrimaryColor, 30);
+		color.scale($loaderPrimaryColor, $lightness: -72%);
 	border-radius:50%;
 	transition:all $animationTime $animationStyle;
 	animation: spin 0.75s infinite linear;
@@ -203,14 +206,14 @@ $animationStyle:cubic-bezier(.23,.78,.69,.84);
 		opacity: 0;
 
 		.spin-loader.shrink {
-			top: calc(25% + #{($loaderHeightWidth/2)});
+			top: calc(25% + #{math.div($loaderHeightWidth, 2)});
 			margin-left:0;
 			width:$loaderMinHeightWidth;
 			height:$loaderMinHeightWidth;
 		}
 		.spin-loader.expand {
-			top: calc(25% - #{($loaderMaxHeightWidth/4)});
-			margin-left:-($loaderMaxHeightWidth/2);
+			top: calc(25% - #{math.div($loaderMaxHeightWidth, 4)});
+			margin-left: -(math.div($loaderMaxHeightWidth, 2));
 			width:$loaderMaxHeightWidth;
 			height:$loaderMaxHeightWidth;
 		}
