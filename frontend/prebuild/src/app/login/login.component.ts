@@ -198,7 +198,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
     // First get an unstarted round ID
-    let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
+    let roundID = await this.http.get(`${environment.API_URL_PARTY}/available`, { responseType: 'text' }).toPromise();
     // Then join the round
     this.joinRoundById(roundID);
   }
