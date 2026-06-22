@@ -30,6 +30,7 @@ import jakarta.ws.rs.sse.SseEventSink;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.libertybikes.game.party.Party;
+import org.libertybikes.game.metric.GameMetrics;
 
 @Path("/party")
 @ApplicationScoped
@@ -45,9 +46,17 @@ public class PartyService {
 
     @Resource
     private ManagedScheduledExecutorService exec;
+    
+    @Inject
+    GameMetrics gameMetrics; // Injected to ensure GameMetrics bean is instantiated and gauges are registered
 
     @PostConstruct
     public void createSingletonParty() {
+        // Force GameMetrics bean initialization by calling toString() which triggers @PostConstruct
+        if (gameMetrics != null) {
+            System.out.println("GameMetrics bean injected: " + gameMetrics.toString());
+        }
+        
         if (!isSingleParty)
             return;
 

@@ -190,6 +190,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async quickJoin() {
+    // Ensure player exists in player service before joining
+    await this.ensurePlayerExists();
+    
     if (this.isSingleParty) {
       this.joinParty();
       return;
@@ -201,6 +204,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async joinParty() {
+    // Ensure player exists in player service before joining
+    await this.ensurePlayerExists();
+    
     let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${this.party}/round`, { responseType: 'text' }).toPromise();
     console.log(`Got roundID=${roundID} for partyID=${this.party}`);
     if (!roundID) {
@@ -214,6 +220,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   async joinRoundById(roundID: string) {
     let ngZone = this.ngZone;
     let router = this.router;
+    
+    if (!roundID) {
+      alert('No round ID provided');
+      return;
+    }
+    
     roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
     // give a controller-only view on mobile devices
     let gameBoard = this.isFullDevice;
@@ -460,5 +472,46 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.hasBotKey = true;
     this.botKey = userId;
     this.aiName = name;
+  }
+
+  /**
+   * Ensures the player exists in the player service.
+   * If the player doesn't exist (e.g., after service restart with in-memory DB),
+   * re-register them using their stored credentials.
+   */
+  async ensurePlayerExists() {
+    const userId = sessionStorage.getItem('userId');
+    const username = sessionStorage.getItem('username');
+    
+    if (!userId || !username) {
+      console.log('No stored user credentials found');
+      return;
+    }
+
+    try {
+      // Check if player exists in player service
+      const player: any = await this.http.get(`${environment.API_URL_PLAYERS}/${userId}`).toPromise();
+      
+      if (player && player.id === userId) {
+        console.log(`Player ${username} (${userId}) already exists in player service`);
+        return;
+      }
+    } catch (error) {
+      console.log(`Player ${username} (${userId}) not found in player service, re-registering...`);
+    }
+
+    // Player doesn't exist, re-register them
+    try {
+      const createdUserId: any = await this.http.post(
+        `${environment.API_URL_PLAYERS}?name=${username}&id=${userId}`,
+        '',
+        { responseType: 'text' }
+      ).toPromise();
+      console.log(`Re-registered player: ${username} with ID: ${createdUserId}`);
+    } catch (error) {
+      console.error(`Failed to re-register player ${username}:`, error);
+      alert('Failed to register player. Please try logging out and logging in again.');
+      throw error;
+    }
   }
 }
