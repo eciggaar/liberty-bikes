@@ -83,18 +83,20 @@ subprojects {
     }
     
     eclipse {
-	    classpath {
-	        defaultOutputDir =  file('build/classes/java/main')
-	        file {
-	            whenMerged {
-	                entries.findAll { it.path.startsWith('src/main') }
+     classpath {
+         defaultOutputDir =  file('build/classes/java/main')
+         // Include compileClasspath (which includes compileOnly) for IDE support
+         plusConfigurations += [configurations.compileClasspath]
+         file {
+             whenMerged {
+                 entries.findAll { it.path.startsWith('src/main') }
                            .each { it.output = "build/classes/java/main" }
-	                entries.findAll { it.path.startsWith('src/test') }
-	                       .each { it.output = "build/classes/java/test" }
-	            }
-	        }
-	    }
-	  }
+                 entries.findAll { it.path.startsWith('src/test') }
+                        .each { it.output = "build/classes/java/test" }
+             }
+         }
+     }
+   }
     
     liberty {
         install {
