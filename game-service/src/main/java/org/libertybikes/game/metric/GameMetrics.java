@@ -3,26 +3,26 @@
  */
 package org.libertybikes.game.metric;
 
-import jakarta.enterprise.inject.spi.CDI;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.Timer;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import org.eclipse.microprofile.metrics.MetricRegistry.Type;
+
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@ApplicationScoped
 public class GameMetrics {
     // Metric names
-    private static final String CURRENT_ROUNDS = "current_num_of_rounds";
     private static final String TOTAL_ROUNDS = "total_num_of_rounds";
-    private static final String CURRENT_PLAYERS = "current_num_of_players";
     private static final String TOTAL_PLAYERS = "total_num_of_players";
     private static final String TOTAL_MOBILE_PLAYERS = "total_num_of_mobile_players";
     private static final String GAME_ROUND_TIMER = "game_round_timer";
-    private static final String CURRENT_PARTIES = "current_number_of_parties";
-    private static final String CURRENT_QUEUED_PLAYERS = "current_num_of_players_in_queue";
     private static final String OPEN_WEBSOCKET_TIMER = "open_game_websocket_timer";
 
     // Atomic counters for gauges
@@ -31,109 +31,109 @@ public class GameMetrics {
     private static final AtomicInteger currentParties = new AtomicInteger(0);
     private static final AtomicInteger currentQueuedPlayers = new AtomicInteger(0);
 
-    private static MetricRegistry registry;
-    private static boolean metricsRegistered = false;
+    @Inject
+    @RegistryType(type = Type.APPLICATION)
+    private MetricRegistry registry;
 
-    private static MetricRegistry getRegistry() {
-        try {
-            if (registry == null) {
-                registry = CDI.current().select(MetricRegistry.class).get();
-                registerMetrics();
-                System.out.println("MetricRegistry configured");
-            }
-            return registry;
-        } catch (Throwable t) {
-            System.out.println("WARNING: Error getting MetricRegistry: " + t.getClass().getName() + ": " + t.getMessage());
-            t.printStackTrace();
-        }
-        return null;
+    @PostConstruct
+    public void init() {
+        // Register gauges programmatically - MicroProfile Metrics 5.x uses Supplier
+        registry.gauge("current_num_of_players", currentPlayers::get);
+        registry.gauge("current_num_of_rounds", currentRounds::get);
+        registry.gauge("current_number_of_parties", currentParties::get);
+        registry.gauge("current_num_of_players_in_queue", currentQueuedPlayers::get);
+        
+        System.out.println("GameMetrics: Registered gauge metrics");
     }
 
-    private static void registerMetrics() {
-        if (metricsRegistered || registry == null) {
-            return;
-        }
-
-        // Register gauges - MicroProfile Metrics 5.0+ uses Supplier<T> where T extends Number
-        registry.gauge(CURRENT_ROUNDS, () -> currentRounds.get());
-        registry.gauge(CURRENT_PLAYERS, () -> currentPlayers.get());
-        registry.gauge(CURRENT_PARTIES, () -> currentParties.get());
-        registry.gauge(CURRENT_QUEUED_PLAYERS, () -> currentQueuedPlayers.get());
-
-        metricsRegistered = true;
-    }
-
+    // Static methods for updating counters
     public static void incrementCurrentRounds() {
-        if (registry != null || (getRegistry() != null)) {
-            currentRounds.incrementAndGet();
-            registry.counter(TOTAL_ROUNDS).inc();
+        currentRounds.incrementAndGet();
+        // Counter will be registered on first use
+        try {
+            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
+            if (instance.registry != null) {
+                instance.registry.counter(TOTAL_ROUNDS).inc();
+            }
+        } catch (Exception e) {
+            // Ignore if CDI not available
         }
     }
 
     public static void decrementCurrentRounds() {
-        if (registry != null || (getRegistry() != null)) {
-            currentRounds.decrementAndGet();
-        }
+        currentRounds.decrementAndGet();
     }
 
     public static void incrementCurrentPlayers() {
-        if (registry != null || (getRegistry() != null)) {
-            currentPlayers.incrementAndGet();
-            registry.counter(TOTAL_PLAYERS).inc();
+        currentPlayers.incrementAndGet();
+        try {
+            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
+            if (instance.registry != null) {
+                instance.registry.counter(TOTAL_PLAYERS).inc();
+            }
+        } catch (Exception e) {
+            // Ignore if CDI not available
         }
     }
 
     public static void decrementCurrentPlayers() {
-        if (registry != null || (getRegistry() != null)) {
-            currentPlayers.decrementAndGet();
-        }
+        currentPlayers.decrementAndGet();
     }
 
     public static void incrementMobilePlayers() {
-        if (registry != null || (getRegistry() != null)) {
-            registry.counter(TOTAL_MOBILE_PLAYERS).inc();
+        try {
+            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
+            if (instance.registry != null) {
+                instance.registry.counter(TOTAL_MOBILE_PLAYERS).inc();
+            }
+        } catch (Exception e) {
+            // Ignore if CDI not available
         }
     }
 
     public static void incrementCurrentParties() {
-        if (registry != null || (getRegistry() != null)) {
-            currentParties.incrementAndGet();
-        }
+        currentParties.incrementAndGet();
     }
 
     public static void decrementCurrentParties() {
-        if (registry != null || (getRegistry() != null)) {
-            currentParties.decrementAndGet();
-        }
+        currentParties.decrementAndGet();
     }
 
     public static void incrementQueuedPlayers() {
-        if (registry != null || (getRegistry() != null)) {
-            currentQueuedPlayers.incrementAndGet();
-        }
+        currentQueuedPlayers.incrementAndGet();
     }
 
     public static void decrementQueuedPlayers() {
-        if (registry != null || (getRegistry() != null)) {
-            currentQueuedPlayers.decrementAndGet();
-        }
+        currentQueuedPlayers.decrementAndGet();
     }
 
     public static AutoCloseable startGameRoundTimer() {
-        if (registry != null || (getRegistry() != null)) {
-            Timer timer = registry.timer(GAME_ROUND_TIMER);
-            long startTime = System.nanoTime();
-            return () -> timer.update(Duration.ofNanos(System.nanoTime() - startTime));
+        try {
+            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
+            if (instance.registry != null) {
+                Timer timer = instance.registry.timer(GAME_ROUND_TIMER);
+                long startTime = System.nanoTime();
+                return () -> timer.update(Duration.ofNanos(System.nanoTime() - startTime));
+            }
+        } catch (Exception e) {
+            // Ignore if CDI not available
         }
         return () -> {};
     }
 
     public static AutoCloseable startWebsocketTimer() {
-        if (registry != null || (getRegistry() != null)) {
-            Timer timer = registry.timer(OPEN_WEBSOCKET_TIMER);
-            long startTime = System.nanoTime();
-            return () -> timer.update(Duration.ofNanos(System.nanoTime() - startTime));
+        try {
+            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
+            if (instance.registry != null) {
+                Timer timer = instance.registry.timer(OPEN_WEBSOCKET_TIMER);
+                long startTime = System.nanoTime();
+                return () -> timer.update(Duration.ofNanos(System.nanoTime() - startTime));
+            }
+        } catch (Exception e) {
+            // Ignore if CDI not available
         }
         return () -> {};
     }
 }
+
+// Made with Bob

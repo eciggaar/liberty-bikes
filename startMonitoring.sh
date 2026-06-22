@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOCAL_HOST=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`
+LOCAL_HOST=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
 echo "This hostname is: $LOCAL_HOST"
 
 PROM_LOCAL_CONFIG=`pwd`/build/monitoring/prometheus-local
@@ -31,7 +31,7 @@ docker run \
   --name lb-grafana \
   --rm \
   -d \
-  -p 3000:3000 \
+  -p 3002:3000 \
   -e  GF_INSTALL_PLUGINS=flant-statusmap-panel \
   -v `pwd`/monitoring/datasource-local:/etc/grafana/provisioning/datasources \
   -v `pwd`/monitoring/dashboardList:/etc/grafana/provisioning/dashboards \
@@ -39,6 +39,6 @@ docker run \
   grafana/grafana:5.2.4
 
 echo "########################################################"  
-echo "Metrics dashboard available at http://localhost:3000"
+echo "Metrics dashboard available at http://localhost:3002"
 echo "Log in with user=admin password=admin"
 echo "########################################################"

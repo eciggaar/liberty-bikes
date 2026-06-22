@@ -1,6 +1,7 @@
 <server>
     <featureManager>
         <feature>microProfile-7.0</feature>
+        <feature>mpMetrics-5.1</feature>
         <feature>beanValidation-3.0</feature>
         <feature>jndi-1.0</feature>
         <feature>servlet-6.0</feature>

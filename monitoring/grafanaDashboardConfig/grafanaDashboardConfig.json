@@ -160,7 +160,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_current_num_of_players_current",
+          "expr": "current_num_of_players{mp_scope=\"application\"}",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -329,7 +329,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_current_num_of_players_in_queue_current",
+          "expr": "current_num_of_players_in_queue{mp_scope=\"application\"}",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -411,7 +411,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_total_num_of_rounds_current",
+          "expr": "current_num_of_rounds{mp_scope=\"application\"}",
           "format": "time_series",
           "hide": false,
           "instant": true,

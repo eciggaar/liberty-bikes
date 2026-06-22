@@ -5,8 +5,8 @@ dependencies {
 }
 
 ext {
-	httpPort = 8080
-	httpsPort = 8443
+	httpPort = 9080
+	httpsPort = 9443
 	appUrl = "http://${hostname}:${httpPort}/openapi/ui"
 }
 

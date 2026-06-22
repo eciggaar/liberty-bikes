@@ -1,6 +1,7 @@
 <server>
     <featureManager>
         <feature>microProfile-7.0</feature>
+        <feature>mpMetrics-5.1</feature>
         <feature>concurrent-3.0</feature>
         <feature>jndi-1.0</feature>
         <feature>websocket-2.1</feature>
