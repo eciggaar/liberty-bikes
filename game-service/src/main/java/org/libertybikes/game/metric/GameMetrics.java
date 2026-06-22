@@ -5,10 +5,12 @@ package org.libertybikes.game.metric;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Timer;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +31,7 @@ public class GameMetrics {
     private static final AtomicInteger currentQueuedPlayers = new AtomicInteger(0);
 
     @Inject
+    @RegistryType(type = MetricRegistry.Type.APPLICATION)
     private MetricRegistry registry;
 
     @PostConstruct
@@ -47,7 +50,7 @@ public class GameMetrics {
     }
     
     public static void incrementTotalRounds() {
-        incrementCounter(TOTAL_ROUNDS);
+        incrementApplicationCounter(TOTAL_ROUNDS);
     }
 
     public static void decrementCurrentRounds() {
@@ -56,7 +59,7 @@ public class GameMetrics {
 
     public static void incrementCurrentPlayers() {
         currentPlayers.incrementAndGet();
-        incrementCounter(TOTAL_PLAYERS);
+        incrementApplicationCounter(TOTAL_PLAYERS);
     }
 
     public static void decrementCurrentPlayers() {
@@ -64,7 +67,7 @@ public class GameMetrics {
     }
 
     public static void incrementMobilePlayers() {
-        incrementCounter(TOTAL_MOBILE_PLAYERS);
+        incrementApplicationCounter(TOTAL_MOBILE_PLAYERS);
     }
 
     public static void incrementCurrentParties() {
@@ -83,15 +86,29 @@ public class GameMetrics {
         currentQueuedPlayers.decrementAndGet();
     }
 
-    private static void incrementCounter(String metricName) {
+    private static void incrementApplicationCounter(String metricName) {
         try {
-            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
-            if (instance.registry != null) {
-                instance.registry.counter(metricName).inc();
-            }
+            MetricRegistry applicationRegistry = CDI.current()
+                .select(MetricRegistry.class, applicationRegistryType())
+                .get();
+            applicationRegistry.counter(metricName).inc();
         } catch (Exception e) {
             // Ignore if CDI not available
         }
+    }
+
+    private static RegistryType applicationRegistryType() {
+        return new RegistryType() {
+            @Override
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return RegistryType.class;
+            }
+
+            @Override
+            public MetricRegistry.Type type() {
+                return MetricRegistry.Type.APPLICATION;
+            }
+        };
     }
 
     public static AutoCloseable startGameRoundTimer() {
