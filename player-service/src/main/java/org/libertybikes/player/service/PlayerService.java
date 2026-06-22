@@ -14,6 +14,9 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
 import org.libertybikes.player.data.PlayerDB;
 
 @Path("/player")
@@ -26,6 +29,14 @@ public class PlayerService {
 
     @Inject
     private JsonWebToken jwt;
+
+    @Inject
+    @RegistryType(type = MetricRegistry.Type.APPLICATION)
+    MetricRegistry registry;
+
+    private Counter getLoginCounter() {
+        return registry.counter("num_player_logins");
+    }
 
     @GET
     public Collection<Player> getPlayers() {
@@ -45,15 +56,19 @@ public class PlayerService {
             name = name.substring(0, 20);
 
         Player p = new Player(name, id);
-        if (db.create(p))
+        boolean isNewPlayer = db.create(p);
+        
+        if (isNewPlayer) {
             System.out.println("Created a new player with id=" + p.id);
-        else
+        } else {
             System.out.println("A player already existed with id=" + p.id);
+        }
+        
+        // Increment login counter for every login attempt (excluding sample players)
+        if (!name.startsWith("SamplePlayer")) {
+            getLoginCounter().inc();
+        }
 
-        // Metrics disabled - MetricRegistry not available during CDI initialization
-        // if (id != null && registry != null) {
-        //     registry.counter("num_player_logins").inc();
-        // }
         return p.id;
     }
 
