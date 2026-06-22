@@ -49,11 +49,28 @@ public class GameMetrics {
     // Static methods for updating counters
     public static void incrementCurrentRounds() {
         currentRounds.incrementAndGet();
-        // Counter will be registered on first use
+    }
+    
+    public static void incrementTotalRounds() {
         try {
-            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
-            if (instance.registry != null) {
-                instance.registry.counter(TOTAL_ROUNDS).inc();
+            // Get MetricRegistry directly from CDI using the annotation
+            RegistryType registryType = new RegistryType() {
+                @Override
+                public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                    return RegistryType.class;
+                }
+                @Override
+                public Type type() {
+                    return Type.APPLICATION;
+                }
+            };
+            
+            MetricRegistry registry = jakarta.enterprise.inject.spi.CDI.current()
+                .select(MetricRegistry.class, registryType)
+                .get();
+            
+            if (registry != null) {
+                registry.counter(TOTAL_ROUNDS).inc();
             }
         } catch (Exception e) {
             // Ignore if CDI not available

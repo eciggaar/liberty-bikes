@@ -411,7 +411,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "current_num_of_rounds{mp_scope=\"application\"}",
+          "expr": "total_num_of_rounds_total{mp_scope=\"application\"}",
           "format": "time_series",
           "hide": false,
           "instant": true,

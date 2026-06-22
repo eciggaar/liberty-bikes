@@ -128,7 +128,7 @@ public class GameRound implements Runnable {
         }
         MAX_TIME_BETWEEN_ROUNDS = (maxTimeBetweenRounds < 5 || maxTimeBetweenRounds > 60) ? MAX_TIME_BETWEEN_ROUNDS_DEFAULT : maxTimeBetweenRounds;
 
-        // Increment round counter metrics
+        // Increment current rounds gauge (for tracking active rounds)
         GameMetrics.incrementCurrentRounds();
     }
 
@@ -601,6 +601,9 @@ public class GameRound implements Runnable {
                 executor().submit(GameRound.this);
             }
             gameState = State.RUNNING;
+
+            // Increment total games played counter when game actually starts
+            GameMetrics.incrementTotalRounds();
 
             // Start round timer metric
             timerContext = GameMetrics.startGameRoundTimer();
