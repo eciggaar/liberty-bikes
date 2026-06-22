@@ -7,11 +7,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Timer;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
-import org.eclipse.microprofile.metrics.MetricRegistry.Type;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +29,6 @@ public class GameMetrics {
     private static final AtomicInteger currentQueuedPlayers = new AtomicInteger(0);
 
     @Inject
-    @RegistryType(type = Type.APPLICATION)
     private MetricRegistry registry;
 
     @PostConstruct
@@ -43,7 +39,6 @@ public class GameMetrics {
         registry.gauge("current_number_of_parties", currentParties::get);
         registry.gauge("current_num_of_players_in_queue", currentQueuedPlayers::get);
         
-        System.out.println("GameMetrics: Registered gauge metrics");
     }
 
     // Static methods for updating counters
@@ -52,29 +47,7 @@ public class GameMetrics {
     }
     
     public static void incrementTotalRounds() {
-        try {
-            // Get MetricRegistry directly from CDI using the annotation
-            RegistryType registryType = new RegistryType() {
-                @Override
-                public Class<? extends java.lang.annotation.Annotation> annotationType() {
-                    return RegistryType.class;
-                }
-                @Override
-                public Type type() {
-                    return Type.APPLICATION;
-                }
-            };
-            
-            MetricRegistry registry = jakarta.enterprise.inject.spi.CDI.current()
-                .select(MetricRegistry.class, registryType)
-                .get();
-            
-            if (registry != null) {
-                registry.counter(TOTAL_ROUNDS).inc();
-            }
-        } catch (Exception e) {
-            // Ignore if CDI not available
-        }
+        incrementCounter(TOTAL_ROUNDS);
     }
 
     public static void decrementCurrentRounds() {
@@ -83,14 +56,7 @@ public class GameMetrics {
 
     public static void incrementCurrentPlayers() {
         currentPlayers.incrementAndGet();
-        try {
-            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
-            if (instance.registry != null) {
-                instance.registry.counter(TOTAL_PLAYERS).inc();
-            }
-        } catch (Exception e) {
-            // Ignore if CDI not available
-        }
+        incrementCounter(TOTAL_PLAYERS);
     }
 
     public static void decrementCurrentPlayers() {
@@ -98,14 +64,7 @@ public class GameMetrics {
     }
 
     public static void incrementMobilePlayers() {
-        try {
-            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
-            if (instance.registry != null) {
-                instance.registry.counter(TOTAL_MOBILE_PLAYERS).inc();
-            }
-        } catch (Exception e) {
-            // Ignore if CDI not available
-        }
+        incrementCounter(TOTAL_MOBILE_PLAYERS);
     }
 
     public static void incrementCurrentParties() {
@@ -122,6 +81,17 @@ public class GameMetrics {
 
     public static void decrementQueuedPlayers() {
         currentQueuedPlayers.decrementAndGet();
+    }
+
+    private static void incrementCounter(String metricName) {
+        try {
+            GameMetrics instance = jakarta.enterprise.inject.spi.CDI.current().select(GameMetrics.class).get();
+            if (instance.registry != null) {
+                instance.registry.counter(metricName).inc();
+            }
+        } catch (Exception e) {
+            // Ignore if CDI not available
+        }
     }
 
     public static AutoCloseable startGameRoundTimer() {
