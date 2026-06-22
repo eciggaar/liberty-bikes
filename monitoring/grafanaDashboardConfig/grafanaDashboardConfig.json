@@ -532,7 +532,7 @@
       "color": {
         "cardColor": "#b4ff00",
         "colorScale": "sqrt",
-        "colorScheme": "interpolateGnYlRd",
+        "colorScheme": "interpolateRdYlGn",
         "defaultColor": "#757575",
         "exponent": 0.5,
         "mode": "spectrum",
