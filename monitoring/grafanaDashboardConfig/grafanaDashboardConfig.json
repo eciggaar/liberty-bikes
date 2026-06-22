@@ -246,7 +246,7 @@
       "tableColumn": "__name__",
       "targets": [
         {
-          "expr": "application_rate_of_websocket_calls_one_min_rate_per_second",
+          "expr": "rate(rate_of_websocket_calls_total[1m])",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
