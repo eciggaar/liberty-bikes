@@ -79,7 +79,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_num_player_logins_total",
+          "expr": "num_player_logins_total",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -473,7 +473,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "base_cpu_systemLoadAverage",
+          "expr": "cpu_systemLoadAverage",
           "format": "time_series",
           "instant": false,
           "interval": "5s",
@@ -625,7 +625,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "base_memory_usedHeap_bytes",
+          "expr": "memory_usedHeap_bytes",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{job}}",
